@@ -11,6 +11,7 @@ import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.client.QueueingConsumer
+import com.rabbitmq.client.ShutdownSignalException
 
 
 class SimpleRabbitMQ( onConnect: Channel => Unit = _=>() ) {
@@ -120,13 +121,13 @@ class SimpleRabbitMQ( onConnect: Channel => Unit = _=>() ) {
 			try {
 				print("Attempting to connect...")
 				connection = factory.newConnection(addresses)
-				println("connected!")
 				channel = connection.createChannel()
 
 				// Perform any one-time setup
 				onConnect(channel)
+				println("connected!")
 			} catch {
-				case e: java.net.ConnectException => {
+				case _: java.io.IOException | _: ShutdownSignalException => {
 					disconnect() // in case we get a connection, but not a channel
 					println("")
 					println("Unable to connect. Waiting...")
