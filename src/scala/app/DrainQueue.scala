@@ -20,6 +20,8 @@ object DrainQueue {
 	val queue = "example"
 
 	def main(args: Array[String]) {
+		var verbose: Boolean = args.contains("-v")
+
 		// Anytime a connection is reestablished, we need to make sure the
 		// queue exists.
 		val rabbit = new SimpleRabbitMQ({ channel =>
@@ -34,9 +36,12 @@ object DrainQueue {
 			val consumer = session.createConsumer(queue, true)
 			while (true) {
 				val message = consumer.receive()
-//				System.out.println(" [x] Received '" + message + "'")
-				var i = message.toInt
-				if ( i % 10000 == 0 ) { println(i) }
+				if ( verbose ) {
+					System.out.println("Received: '" + message + "'")
+				} else {
+					var i = message.toInt
+					if ( i % 10000 == 0 ) { println(i) }
+				}
 			}
 		}
 	}
