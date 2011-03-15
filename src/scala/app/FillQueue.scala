@@ -16,19 +16,22 @@ import lib.SimpleRabbitMQ
 
 
 object FillQueue {
+	val exchange = "example-exchange"
 	val queue = "example"
 
 	def main(args: Array[String]) {
 		// Anytime a connection is reestablished, we need to make sure the
 		// queue exists.
 		val rabbit = new SimpleRabbitMQ({ channel =>
+			channel.exchangeDeclare(exchange, "fanout")
 			channel.queueDeclare(queue, false, false, false, null)
+			channel.queueBind(queue, exchange, "")
 		})
 
 		// Open up a connection, create a producer, and send lots of messages. Notice how the
 		// producer does not have to worry about trapping connection related errors.
 		rabbit.withSession { session =>
-			val producer = session.createProducer("", queue)
+			val producer = session.createProducer(exchange, "")
 			for ( i <- 1 to 100000 )
 			{
 				val message = i.toString

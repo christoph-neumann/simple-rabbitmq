@@ -16,13 +16,16 @@ import lib.SimpleRabbitMQ
 
 
 object DrainQueue {
+	val exchange = "example-exchange"
 	val queue = "example"
 
 	def main(args: Array[String]) {
 		// Anytime a connection is reestablished, we need to make sure the
 		// queue exists.
 		val rabbit = new SimpleRabbitMQ({ channel =>
+			channel.exchangeDeclare(exchange, "fanout")
 			channel.queueDeclare(queue, false, false, false, null)
+			channel.queueBind(queue, exchange, "")
 		})
 
 		// Open up a connection, create a consumer, and wait for messages. Notice how the consumer
