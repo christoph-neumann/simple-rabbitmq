@@ -6,7 +6,10 @@ Class to simplify the usage of RabbitMQ with connection failover.
 
 package lib
 
+import java.net.SocketException
+
 import com.rabbitmq.client.Address
+import com.rabbitmq.client.AlreadyClosedException
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Connection
 import com.rabbitmq.client.ConnectionFactory
@@ -104,8 +107,7 @@ class SimpleRabbitMQ( onConnect: Channel => Unit = _=>() ) {
 				//   com.rabbitmq.client.AlreadyClosedException
 				//   com.rabbitmq.client.ShutdownSignalException
 				//   java.net.SocketException
-				// but we catch them all...muhahaha!
-				case e: Exception => {
+				case _: AlreadyClosedException | _: ShutdownSignalException | _: SocketException => {
 					disconnect()
 					connect()
 					onConnect(channel)
